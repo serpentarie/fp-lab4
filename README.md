@@ -135,10 +135,24 @@ dune build
 
 ### Запуск демонстрации
 ```bash
-dune exec ./bin/main.exe
+dune exec lab4
 ```
 
 Вывод покажет примеры работы JSON и CSV парсеров.
+
+### Парсинг файлов
+
+Программа поддерживает чтение и парсинг данных из файлов:
+
+**Парсинг JSON файла:**
+```bash
+dune exec lab4 json <filename>
+```
+
+**Парсинг CSV файла:**
+```bash
+dune exec lab4 csv <filename>
+```
 
 ### Запуск тестов
 ```bash

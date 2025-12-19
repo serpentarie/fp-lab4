@@ -105,9 +105,81 @@ let demo_csv () =
   | Error (Lab4.Parser.ParserError (loc, msg)) ->
       Printf.printf "Error at position %d: %s\n\n" loc msg
 
+let parse_file_as_json filename =
+  try
+    let ic = open_in filename in
+    let content = really_input_string ic (in_channel_length ic) in
+    close_in ic;
+    print_endline ("=== Parsing JSON from file: " ^ filename ^ " ===\n");
+    match parse_json content with
+    | Ok value ->
+        Printf.printf "Successfully parsed JSON:\n%s\n\n"
+          (show_json_value value);
+        Ok ()
+    | Error (Lab4.Parser.ParserError (loc, msg)) ->
+        Printf.eprintf "JSON Parse Error at position %d: %s\n\n" loc msg;
+        Error ()
+  with
+  | Sys_error err ->
+      Printf.eprintf "File Error: %s\n" err;
+      Error ()
+  | e ->
+      Printf.eprintf "Unexpected Error: %s\n" (Printexc.to_string e);
+      Error ()
+
+let parse_file_as_csv filename =
+  try
+    let ic = open_in filename in
+    let content = really_input_string ic (in_channel_length ic) in
+    close_in ic;
+    print_endline ("=== Parsing CSV from file: " ^ filename ^ " ===\n");
+    match parse_csv_with_headers content with
+    | Ok (header, rows) ->
+        Printf.printf "Header: %s\n" (String.concat ", " header);
+        Printf.printf "Number of rows: %d\n" (List.length rows);
+        Printf.printf "\nData:\n";
+        List.iteri
+          (fun i row ->
+            Printf.printf "  Row %d: [%s]\n" (i + 1) (String.concat " | " row))
+          rows;
+        print_newline ();
+        Ok ()
+    | Error (Lab4.Parser.ParserError (loc, msg)) ->
+        Printf.eprintf "CSV Parse Error at position %d: %s\n\n" loc msg;
+        Error ()
+  with
+  | Sys_error err ->
+      Printf.eprintf "File Error: %s\n" err;
+      Error ()
+  | e ->
+      Printf.eprintf "Unexpected Error: %s\n" (Printexc.to_string e);
+      Error ()
+
+let print_usage () =
+  print_endline "Usage:";
+  print_endline "  lab4                    - Run demo examples";
+  print_endline "  lab4 json <file>        - Parse JSON from file";
+  print_endline "  lab4 csv <file>         - Parse CSV from file";
+  print_newline ()
+
 let () =
-  demo_json ();
-  print_endline (String.make 60 '=');
-  print_newline ();
-  demo_csv ();
-  print_endline "Demo complete!"
+  let args = Array.to_list Sys.argv in
+  match args with
+  | [ _ ] ->
+      (* No arguments - run demo *)
+      demo_json ();
+      print_endline (String.make 60 '=');
+      print_newline ();
+      demo_csv ();
+      print_endline "Demo complete!"
+  | [ _; "json"; filename ] ->
+      let _ = parse_file_as_json filename in
+      ()
+  | [ _; "csv"; filename ] ->
+      let _ = parse_file_as_csv filename in
+      ()
+  | [ _; "--help" ] | [ _; "-h" ] -> print_usage ()
+  | _ ->
+      print_endline "Invalid arguments.\n";
+      print_usage ();
+      exit 1
