@@ -1,0 +1,7 @@
+(test
+ (name test_ex)
+ (libraries lab4 alcotest))
+
+(test
+ (name test_csv)
+ (libraries lab4 alcotest))

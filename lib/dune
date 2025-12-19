@@ -1,0 +1,4 @@
+(library
+ (name lab4)
+ (modules parser basic_parsers json_parser csv_parser)
+ (libraries str))
